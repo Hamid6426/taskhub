@@ -1,12 +1,10 @@
 # Project File & Folder Structure
 
-Feature-first, flat-lean structure
-
 ```
 taskhub/
 ├── src/
 │   ├── app/
-│   │   │── routes/                      # route-level smart components
+│   │   │── login/                      # route-level smart components
 │   │   │   ├── dashboard.ts
 │   │   │   └── login.ts
 │   │   ├── app.config.ts
@@ -59,7 +57,7 @@ taskhub/
 │   ├── main.server.ts
 │   ├── main.ts
 │   ├── server.ts
-│   └── styles.scss
+│   └── styles.scss # Just bootstrap import
 │
 ├── angular.json
 ├── package.json
