@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TaskPriority } from '../../core/models/task.model';
 
@@ -7,9 +7,15 @@ import { TaskPriority } from '../../core/models/task.model';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="flex space-x-2 mb-4">
-      <input type="text" placeholder="Search..." (input)="onSearch($event)" class="input" />
-      <select (change)="onFilter($event)" class="input">
+    <div class="input-group mb-4">
+      <input
+        type="text"
+        placeholder="Search..."
+        [value]="searchQuery"
+        (input)="onSearch($event)"
+        class="input"
+      />
+      <select [value]="selectedPriority" (change)="onFilter($event)" class="input select-form">
         <option value="">All Priorities</option>
         <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
       </select>
@@ -17,6 +23,9 @@ import { TaskPriority } from '../../core/models/task.model';
   `,
 })
 export class TaskFilters {
+  @Input() searchQuery = '';
+  @Input() selectedPriority: TaskPriority | '' = '';
+
   @Output() search = new EventEmitter<string>();
   @Output() filter = new EventEmitter<TaskPriority | ''>();
 

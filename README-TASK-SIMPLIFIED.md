@@ -4,7 +4,7 @@
 
 - Angular 17+ (standalone components, Signals where appropriate)
 - Lazy-loaded routing
-- Styling with Tailwind CSS or SCSS (responsive, accessible)
+- Styling with Bootstrap or Tailwind CSS or SCSS (responsive, accessible)
 
 ## Features
 

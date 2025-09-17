@@ -1,39 +1,66 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Task, TaskPriority } from '../../core/models/task.model';
+import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgFor],
   template: `
-    <form (ngSubmit)="submit()" class="p-4 border rounded space-y-4">
-      <input
-        type="text"
-        [(ngModel)]="task.title"
-        name="title"
-        placeholder="Title"
-        required
-        class="input"
-      />
-      <textarea
-        [(ngModel)]="task.description"
-        name="description"
-        placeholder="Description"
-        class="input"
-      ></textarea>
-      <input type="date" [(ngModel)]="dueDate" name="dueDate" required class="input" />
-      <select [(ngModel)]="task.priority" name="priority" required class="input">
-        <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
-      </select>
-      <button type="submit" class="btn-primary">Save Task</button>
+    <form (ngSubmit)="submit()" class="p-4 border rounded-3">
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input
+          id="title"
+          type="text"
+          [(ngModel)]="task.title"
+          name="title"
+          class="form-control"
+          placeholder="Enter task title"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea
+          id="description"
+          [(ngModel)]="task.description"
+          name="description"
+          class="form-control"
+          placeholder="Enter task description"
+        ></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="dueDate" class="form-label">Due Date</label>
+        <input
+          id="dueDate"
+          type="date"
+          [(ngModel)]="dueDate"
+          name="dueDate"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="priority" class="form-label">Priority</label>
+        <select
+          id="priority"
+          [(ngModel)]="task.priority"
+          name="priority"
+          class="form-select"
+          required
+        >
+          <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Save Task</button>
     </form>
   `,
 })
 export class TaskForm {
-  @Output() save = new EventEmitter<Task>();
+  @Output() create = new EventEmitter<Task>();
 
-  // Use Partial<Task> to avoid duplicating optional fields for initialization
   task: Partial<Task> = {
     title: '',
     description: '',
@@ -46,12 +73,12 @@ export class TaskForm {
 
   submit() {
     const now = new Date();
-    this.save.emit({
+    this.create.emit({
       ...this.task,
       id: Date.now(),
       dueDate: new Date(this.dueDate),
       createdAt: now,
       updatedAt: now,
-    } as Task); // cast to full Task for output
+    } as Task);
   }
 }

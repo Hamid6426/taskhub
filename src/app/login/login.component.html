@@ -1,4 +1,3 @@
-<!-- src/app/login/login.html -->
 <div class="container d-flex justify-content-center align-items-center vh-100">
   <div class="card shadow-sm p-4" style="min-width: 360px; max-width: 400px">
     <h2 class="text-center mb-4">TaskHub Login</h2>
@@ -43,7 +42,9 @@
       <!-- Error -->
       <div *ngIf="loginError()" class="alert alert-danger py-2">Invalid credentials</div>
 
-      <button class="btn btn-primary w-100" type="submit" [disabled]="form.invalid">Login</button>
+      <button class="btn btn-primary w-100" type="submit" [disabled]="form.invalid || isLoading()">
+        Login
+      </button>
     </form>
   </div>
 </div>

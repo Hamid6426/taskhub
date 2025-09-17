@@ -1,50 +1,29 @@
-import { Component, computed, signal } from '@angular/core';
-import { Task } from '../../core/models/task.model';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TaskCard } from './task-card';
 import { Loader } from './loader';
-import { ApiService } from '../../core/services/api.service';
-import { CommonModule } from '@angular/common';
+import { Task } from '../../core/models/task.model';
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [TaskCard, Loader, CommonModule],
+  imports: [CommonModule, TaskCard, Loader],
   template: `
-    <app-loader [loading]="loading()"></app-loader>
-    <div *ngIf="!loading()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-loader *ngIf="loading"></app-loader>
+    <div *ngIf="!loading" class="row row-cols-1 row-cols-md-2 g-4">
       <app-task-card
-        *ngFor="let task of tasks()"
+        *ngFor="let task of tasks"
         [task]="task"
-        (selectTask)="viewTask($event)"
+        (selectTask)="selectTask.emit($event)"
+        (deleteTask)="deleteTask.emit($event)"
       ></app-task-card>
     </div>
   `,
 })
-export class TaskListComponent {
-  tasks = signal<Task[]>([]);
-  loading = signal(true);
+export class TaskList {
+  @Input() tasks: Task[] = [];
+  @Input() loading = false;
 
-  constructor(private api: ApiService) {
-    this.fetchTasks();
-  }
-
-  fetchTasks() {
-    this.loading.set(true);
-    this.api.getTasks().subscribe({
-      next: (apiResponse) => {
-        // Ensure apiResponse is of type ApiResponse<Task[]>
-        if (apiResponse && Array.isArray(apiResponse.response)) {
-          this.tasks.set(apiResponse.response);
-        } else {
-          console.error('Invalid response format:', apiResponse);
-        }
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
-  }
-
-  viewTask(task: Task) {
-    console.log('Selected task:', task);
-  }
+  @Output() selectTask = new EventEmitter<Task>();
+  @Output() deleteTask = new EventEmitter<number>();
 }

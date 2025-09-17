@@ -4,9 +4,14 @@
 taskhub/
 ├── src/
 │   ├── app/
-│   │   │── login/                      # route-level smart components
-│   │   │   ├── dashboard.ts
+│   │   │── dashboard/
+│   │   │   └── dashboard.html
+│   │   │   └── dashboard.spec.ts
+│   │   │   └── dashboard.ts
+│   │   │── login/
+│   │   │   └── login.html
 │   │   │   └── login.ts
+│   │   │   └── login.spec.ts
 │   │   ├── app.config.ts
 │   │   ├── app.config.server.ts
 │   │   ├── app.routes.ts
@@ -46,13 +51,13 @@ taskhub/
 │   │
 │   │── shared/                     # reusable dumb UI
 │   │   ├── components/
-│   │   │   ├── navbar.component.ts
-│   │   │   ├── loader.component.ts
-│   │   │   ├── task-list.component.ts
-│   │   │   ├── task-detail.component.ts
-│   │   │   ├── task-form.component.ts
-│   │   │   ├── task-card.component.ts
-│   │   │   └── task-filters.component.ts
+│   │   │   ├── navbar.ts
+│   │   │   ├── loader.ts
+│   │   │   ├── task-list.ts
+│   │   │   ├── task-detail.ts
+│   │   │   ├── task-form.ts
+│   │   │   ├── task-card.ts
+│   │   │   └── task-filters.ts
 │   │   ├── directives/
 │   │   │   └── autofocus.directive.ts
 │   │   └── pipes/

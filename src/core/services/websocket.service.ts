@@ -5,7 +5,7 @@ import { ApiService } from './api.service';
 import { switchMap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
-export class WebsocketService {
+export class WebSocketService {
   private taskUpdates = new Subject<Task>();
 
   constructor(private api: ApiService) {

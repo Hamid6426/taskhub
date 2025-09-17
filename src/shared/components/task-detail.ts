@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Task } from '../../core/models/task.model';
 import { CommonModule } from '@angular/common';
 
@@ -13,9 +13,19 @@ import { CommonModule } from '@angular/common';
       <p class="text-sm text-gray-500">Due: {{ task.dueDate | date : 'shortDate' }}</p>
       <p class="text-sm">Priority: {{ task.priority }}</p>
       <p class="text-sm">Status: {{ task.completed ? 'Completed' : 'Pending' }}</p>
+
+      <!-- Example update button -->
+      <button (click)="toggleComplete()">Toggle Complete</button>
     </div>
   `,
 })
 export class TaskDetail {
-  @Input() task!: Task;
+  @Input() task: Task | null = null;
+  @Output() update = new EventEmitter<Task>();
+
+  toggleComplete() {
+    if (!this.task) return;
+    const updated: Task = { ...this.task, completed: !this.task.completed, updatedAt: new Date() };
+    this.update.emit(updated);
+  }
 }
