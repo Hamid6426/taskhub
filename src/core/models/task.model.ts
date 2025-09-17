@@ -7,6 +7,6 @@ export interface Task {
   dueDate: Date; // cannot be in the past
   priority: TaskPriority; // priority level
   completed: boolean; // status
-  createdAt?: Date; // auto timestamp
-  updatedAt?: Date; // auto timestamp
+  createdAt: Date; // auto timestamp
+  updatedAt: Date; // auto timestamp
 }

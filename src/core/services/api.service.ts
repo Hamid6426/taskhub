@@ -4,82 +4,95 @@ import { Task } from '../models/task.model';
 import { of, delay, throwError } from 'rxjs';
 import { MOCK_TASKS } from '../../mocks/tasks.mock';
 import { MOCK_USERS } from '../../mocks/users.mock';
+import { wrapResponse } from '../../shared/utils/response-wrapper';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private tasks = signal<Task[]>([]);
-  private users = signal<User[]>([]);
+  private tasks = signal<Task[]>(MOCK_TASKS);
+  private users = signal<User[]>(MOCK_USERS);
 
   constructor() {
     // Load tasks from localStorage if available, else use mocks
-    const savedTasks = localStorage.getItem('tasks');
-    this.tasks.set(savedTasks ? JSON.parse(savedTasks) : [...MOCK_TASKS]);
+    if (typeof window !== 'undefined') {
+      // Browser-only logic
+      const savedTasks = localStorage.getItem('tasks');
+      this.tasks.set(savedTasks ? JSON.parse(savedTasks) : [...MOCK_TASKS]);
+    }
 
     // Load users (mocks only, no persistence)
     this.users.set([...MOCK_USERS]);
   }
 
   private persistTasks() {
-    localStorage.setItem('tasks', JSON.stringify(this.tasks()));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tasks', JSON.stringify(this.tasks()));
+    }
   }
 
   getTasks() {
-    return of(this.tasks()).pipe(
-      delay(Math.random() * 500 + 200) // simulate network latency
+    return wrapResponse(
+      of(this.tasks()).pipe(delay(Math.random() * 500 + 200)),
+      'Tasks retrieved successfully'
     );
   }
 
   getTask(id: number) {
     const task = this.tasks().find((t) => t.id === id);
     return task
-      ? of(task).pipe(delay(Math.random() * 300 + 100))
+      ? wrapResponse(of(task).pipe(delay(Math.random() * 300 + 100)), 'Task retrieved successfully')
       : throwError(() => new Error('Task not found'));
   }
 
   addTask(task: Task) {
     const current = this.tasks();
-    // Optimistic update
     this.tasks.set([...current, task]);
     this.persistTasks();
-
-    // Simulate async call with possible random error
-    return of(task).pipe(
-      delay(Math.random() * 500 + 200)
-      // Optionally simulate error
-      // switchMap(() => Math.random() < 0.1 ? throwError(() => new Error('Failed to add task')) : of(task))
-    );
+    return wrapResponse(of(task).pipe(delay(Math.random() * 500 + 200)), 'Task added successfully');
   }
 
   updateTask(task: Task) {
     const current = this.tasks().map((t) => (t.id === task.id ? task : t));
-    // Optimistic update
     this.tasks.set(current);
     this.persistTasks();
-
-    return of(task).pipe(delay(Math.random() * 500 + 200));
+    return wrapResponse(
+      of(task).pipe(delay(Math.random() * 500 + 200)),
+      'Task updated successfully'
+    );
   }
 
   deleteTask(id: number) {
     const current = this.tasks().filter((t) => t.id !== id);
     this.tasks.set(current);
     this.persistTasks();
-
-    return of(null).pipe(delay(Math.random() * 500 + 200));
+    return wrapResponse(
+      of(null).pipe(delay(Math.random() * 500 + 200)),
+      'Task deleted successfully'
+    );
   }
 
-  // Mock login (email only, no password)
-  login(email: string) {
+  login(email: string, password: string) {
     const user = this.users().find((u) => u.email === email);
-    if (!user) return throwError(() => new Error('User not found'));
+    if (!user) {
+      return throwError(() => new Error('User not found'));
+    }
 
-    // persist current user in sessionStorage
-    sessionStorage.setItem('currentUser', JSON.stringify(user));
+    if (password !== 'password') {
+      return throwError(() => new Error('Invalid credentials'));
+    }
 
-    return of(user).pipe(delay(Math.random() * 400 + 100));
+    try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Error saving to sessionStorage', error);
+    }
+
+    return wrapResponse(of(user).pipe(delay(500)), 'Login successful');
   }
 
   logout() {
     sessionStorage.removeItem('currentUser');
-    return of(true).pipe(delay(100));
+    return wrapResponse(of(true).pipe(delay(100)), 'Logout successful');
   }
 }

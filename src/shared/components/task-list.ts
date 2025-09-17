@@ -31,8 +31,13 @@ export class TaskListComponent {
   fetchTasks() {
     this.loading.set(true);
     this.api.getTasks().subscribe({
-      next: (tasks) => {
-        this.tasks.set(tasks);
+      next: (apiResponse) => {
+        // Ensure apiResponse is of type ApiResponse<Task[]>
+        if (apiResponse && Array.isArray(apiResponse.response)) {
+          this.tasks.set(apiResponse.response);
+        } else {
+          console.error('Invalid response format:', apiResponse);
+        }
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

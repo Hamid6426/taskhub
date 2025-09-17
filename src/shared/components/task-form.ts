@@ -32,19 +32,26 @@ import { Task, TaskPriority } from '../../core/models/task.model';
 })
 export class TaskForm {
   @Output() save = new EventEmitter<Task>();
-  task: Task = {
-    id: Date.now(),
+
+  // Use Partial<Task> to avoid duplicating optional fields for initialization
+  task: Partial<Task> = {
     title: '',
     description: '',
     priority: 'medium',
-    dueDate: new Date(),
     completed: false,
   };
+
   dueDate: string = new Date().toISOString().split('T')[0];
   priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
   submit() {
-    this.task.dueDate = new Date(this.dueDate);
-    this.save.emit(this.task);
+    const now = new Date();
+    this.save.emit({
+      ...this.task,
+      id: Date.now(),
+      dueDate: new Date(this.dueDate),
+      createdAt: now,
+      updatedAt: now,
+    } as Task); // cast to full Task for output
   }
 }

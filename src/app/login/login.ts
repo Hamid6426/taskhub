@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-login',
@@ -12,6 +13,7 @@ import { Router } from '@angular/router';
 export class Login {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private apiService = inject(ApiService);
 
   // signals for error state
   loginError = signal(false);
@@ -24,14 +26,16 @@ export class Login {
   onSubmit() {
     if (this.form.invalid) return;
 
-    const { email, password } = this.form.value;
+    const email = this.form.value.email!;
+    const password = this.form.value.password!;
 
-    // mock check
-    if (email === 'admin@example.com' && password === 'password') {
-      this.loginError.set(false);
-      this.router.navigateByUrl('/dashboard');
-    } else {
-      this.loginError.set(true);
-    }
+    this.apiService.login(email, password).subscribe((res) => {
+      if (res.response) {
+        this.loginError.set(false);
+        this.router.navigateByUrl('/dashboard');
+      } else {
+        this.loginError.set(true);
+      }
+    });
   }
 }
