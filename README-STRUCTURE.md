@@ -39,6 +39,11 @@ taskhub/
 │   │       ├── cookie-storage.service.ts
 │   │       └── session-storage.service.ts
 │   │
+│   ├── mocks/
+│   │   ├── tasks.mock.ts
+│   │   ├── users.mock.ts
+│   │   └── websocket.mock.ts
+│   │
 │   │── shared/                     # reusable dumb UI
 │   │   ├── components/
 │   │   │   ├── navbar.component.ts
@@ -48,10 +53,10 @@ taskhub/
 │   │   │   ├── task-form.component.ts
 │   │   │   ├── task-card.component.ts
 │   │   │   └── task-filters.component.ts
-│   │   ├── pipes/
-│   │   │   └── date-format.pipe.ts
-│   │   └── directives/
-│   │       └── autofocus.directive.ts
+│   │   ├── directives/
+│   │   │   └── autofocus.directive.ts
+│   │   └── pipes/
+│   │       └── date-format.pipe.ts
 │   │
 │   ├── index.html
 │   ├── main.server.ts
