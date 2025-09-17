@@ -1,15 +1,15 @@
 import { Component, Input, Output, EventEmitter, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TaskCard } from './task-card';
 import { Loader } from './loader';
 import { Task } from '../../core/models/task.model';
 import { ApiService } from '../../core/services/api.service';
 import { User } from '../../core/models/user.model';
+import { ReadonlyTaskCard } from './readonly-task-card';
 
 @Component({
-  selector: 'app-task-list',
+  selector: 'app-readonly-task-list',
   standalone: true,
-  imports: [CommonModule, TaskCard, Loader],
+  imports: [CommonModule, ReadonlyTaskCard, Loader],
   template: `
     <app-loader *ngIf="loading"></app-loader>
 
@@ -30,18 +30,16 @@ import { User } from '../../core/models/user.model';
         </div>
       </div>
 
-      <app-task-card
+      <app-readonly-task-card
         *ngFor="let task of tasks"
         [task]="task"
         (selectTask)="selectTask.emit($event)"
-        (deleteTask)="deleteTask.emit($event)"
         (openViewModal)="openViewModal.emit($event)"
-        (openEditModal)="openEditModal.emit($event)"
-      ></app-task-card>
+      ></app-readonly-task-card>
     </div>
   `,
 })
-export class TaskList {
+export class ReadonlyTaskList {
   @Input() tasks: Task[] = [];
   @Input() loading = false;
 
@@ -50,7 +48,5 @@ export class TaskList {
   currentUserRole = computed(() => this.currentUser()?.role ?? null);
 
   @Output() selectTask = new EventEmitter<Task>();
-  @Output() deleteTask = new EventEmitter<number>();
-  @Output() openEditModal = new EventEmitter<Task>();
   @Output() openViewModal = new EventEmitter<Task>();
 }

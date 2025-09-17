@@ -15,7 +15,7 @@ interval(7000)
       const updatedTask: Task = {
         ...randomTask,
         title: randomTask.title + ' (updated)',
-        completed: Math.random() > 0.5 ? true : randomTask.completed,
+        status: randomTask.status,
       };
       return updatedTask;
     })

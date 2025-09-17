@@ -7,27 +7,24 @@ import { MOCK_USERS } from '../../mocks/users.mock';
 import { wrapResponse } from '../../shared/utils/response-wrapper';
 
 @Injectable({ providedIn: 'root' })
-export class ApiService {
+export class ClientApiService {
   private tasks = signal<Task[]>(MOCK_TASKS);
   private users = signal<User[]>(MOCK_USERS);
   private currentUser = signal<User | null>(null);
 
   constructor() {
-    // Load tasks from localStorage if available, else use mocks
+    this.loadTasksFromStorage();
+    this.loadCurrentUserFromStorage();
+  }
+
+  private loadTasksFromStorage() {
     if (typeof window !== 'undefined') {
-      // Browser-only logic
       const savedTasks = localStorage.getItem('tasks');
-      this.tasks.set(savedTasks ? JSON.parse(savedTasks) : [...MOCK_TASKS]);
-    }
-
-    // Load users (mocks only, no persistence)
-    this.users.set([...MOCK_USERS]);
-
-    // Load currentUser from localStorage
-    if (typeof window !== 'undefined') {
-      const savedUser = localStorage.getItem('currentUser');
-      if (savedUser) {
-        this.currentUser.set(JSON.parse(savedUser));
+      if (savedTasks) {
+        this.tasks.set(JSON.parse(savedTasks));
+      } else {
+        this.tasks.set([...MOCK_TASKS]);
+        this.persistTasks();
       }
     }
   }
@@ -38,20 +35,20 @@ export class ApiService {
     }
   }
 
+  private loadCurrentUserFromStorage() {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) this.currentUser.set(JSON.parse(savedUser));
+    }
+  }
+
   /** Get tasks based on role */
   getTasks() {
     const user = this.currentUser();
     if (!user) return throwError(() => new Error('Not logged in'));
 
-    const allTasks = this.tasks();
     const visibleTasks =
-      user.role === 'admin'
-        ? allTasks
-        : allTasks.filter((t) => Number(t.assigneeId) === Number(user.id));
-
-    console.log('Current user:', user);
-    console.log('All tasks:', allTasks);
-    console.log('Visible tasks:', visibleTasks);
+      user.role === 'admin' ? this.tasks() : this.tasks().filter((t) => t.assigneeId === user.id);
 
     return wrapResponse(of(visibleTasks).pipe(delay(Math.random() * 500 + 200)), 'Tasks retrieved');
   }
@@ -62,10 +59,8 @@ export class ApiService {
 
     const user = this.currentUser();
     if (!user) return throwError(() => new Error('Not logged in'));
-
-    if (user.role !== 'admin' && task.assigneeId !== user.id) {
+    if (user.role !== 'admin' && task.assigneeId !== user.id)
       return throwError(() => new Error('Access denied'));
-    }
 
     return wrapResponse(of(task).pipe(delay(Math.random() * 300 + 100)), 'Task retrieved');
   }
@@ -75,18 +70,18 @@ export class ApiService {
     const user = this.currentUser();
     if (!user || user.role !== 'admin') return throwError(() => new Error('Permission denied'));
 
-    const completeTask: Task = {
+    const nextId = Math.max(...this.tasks().map((t) => t.id), 0) + 1;
+    const newTask: Task = {
       ...task,
-      assigneeId: task.assigneeId ?? null,
+      id: nextId,
       status: task.status ?? 'to_do',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const current = this.tasks();
-    this.tasks.set([...current, completeTask]);
+    this.tasks.set([...this.tasks(), newTask]);
     this.persistTasks();
-    return wrapResponse(of(task).pipe(delay(Math.random() * 500 + 200)), 'Task added');
+    return wrapResponse(of(newTask).pipe(delay(Math.random() * 500 + 200)), 'Task added');
   }
 
   /** Admin can update any task; user can update only their task status */
@@ -94,29 +89,21 @@ export class ApiService {
     const user = this.currentUser();
     if (!user) return throwError(() => new Error('Not logged in'));
 
-    const current = this.tasks();
-    const existing = current.find((t) => t.id === task.id);
+    const existing = this.tasks().find((t) => t.id === task.id);
     if (!existing) return throwError(() => new Error('Task not found'));
 
-    // User restrictions
-    if (user.role !== 'admin') {
-      if (existing.assigneeId !== user.id) return throwError(() => new Error('Permission denied'));
+    if (user.role !== 'admin' && existing.assigneeId !== user.id)
+      return throwError(() => new Error('Permission denied'));
 
-      // Users can only update status
-      this.tasks.set(
-        current.map((t) =>
-          t.id === task.id ? { ...t, status: task.status, updatedAt: new Date() } : t
-        )
-      );
-    } else {
-      // Admin can update any field
-      this.tasks.set(
-        current.map((t) => (t.id === task.id ? { ...task, updatedAt: new Date() } : t))
-      );
-    }
+    const updatedTask: Task =
+      user.role === 'admin'
+        ? { ...task, updatedAt: new Date() }
+        : { ...existing, status: task.status, updatedAt: new Date() };
 
+    this.tasks.set(this.tasks().map((t) => (t.id === task.id ? updatedTask : t)));
     this.persistTasks();
-    return wrapResponse(of(task).pipe(delay(Math.random() * 500 + 200)), 'Task updated');
+
+    return wrapResponse(of(updatedTask).pipe(delay(Math.random() * 500 + 200)), 'Task updated');
   }
 
   /** Only admin can delete */
@@ -124,9 +111,9 @@ export class ApiService {
     const user = this.currentUser();
     if (!user || user.role !== 'admin') return throwError(() => new Error('Permission denied'));
 
-    const current = this.tasks().filter((t) => t.id !== id);
-    this.tasks.set(current);
+    this.tasks.set(this.tasks().filter((t) => t.id !== id));
     this.persistTasks();
+
     return wrapResponse(of(null).pipe(delay(Math.random() * 500 + 200)), 'Task deleted');
   }
 
@@ -136,24 +123,16 @@ export class ApiService {
     if (!user) return throwError(() => new Error('User not found'));
     if (password !== 'password') return throwError(() => new Error('Invalid credentials'));
 
-    // Set the signal
     this.currentUser.set(user);
-
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-      }
-    } catch (error) {
-      console.error('Error saving to localStorage', error);
-    }
+    if (typeof window !== 'undefined') localStorage.setItem('currentUser', JSON.stringify(user));
 
     return wrapResponse(of(user).pipe(delay(500)), 'Login successful');
   }
 
   logout() {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('currentUser');
-    }
+    this.currentUser.set(null);
+    if (typeof window !== 'undefined') localStorage.removeItem('currentUser');
+
     return wrapResponse(of(true).pipe(delay(100)), 'Logout successful');
   }
 

@@ -21,7 +21,7 @@ export const MOCK_TASKS: Task[] = [
     description: 'Email-only auth',
     priority: 'high' as TaskPriority,
     status: 'to_do' as TaskStatus,
-    assigneeId: null, // unassigned
+    assigneeId: 2,
     createdById: 1, // admin user ID
     dueDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
     createdAt: now,

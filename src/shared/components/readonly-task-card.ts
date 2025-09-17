@@ -3,7 +3,7 @@ import { Task } from '../../core/models/task.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-task-card',
+  selector: 'app-readonly-task-card',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -17,20 +17,6 @@ import { CommonModule } from '@angular/common';
             aria-label="View task"
           >
             <i class="bi bi-eye-fill"></i>
-          </button>
-          <button
-            class="btn btn-sm btn-outline-primary"
-            (click)="onEditModalOpen(); $event.stopPropagation()"
-            aria-label="Edit task"
-          >
-            <i class="bi bi-pencil-fill"></i>
-          </button>
-          <button
-            class="btn btn-sm btn-danger"
-            (click)="onDelete(); $event.stopPropagation()"
-            aria-label="Delete task"
-          >
-            <i class="bi bi-trash"></i>
           </button>
         </div>
       </div>
@@ -46,32 +32,20 @@ import { CommonModule } from '@angular/common';
     `,
   ],
 })
-export class TaskCard {
+export class ReadonlyTaskCard {
   @Input() task!: Task;
 
   @Output() selectTask = new EventEmitter<Task>();
-  @Output() deleteTask = new EventEmitter<number>();
-  @Output() openEditModal = new EventEmitter<Task>();
   @Output() openViewModal = new EventEmitter<Task>();
 
-  // Track selection state
   isSelected = signal(false);
 
   onSelect() {
-    // Toggle selection state
     this.isSelected.set(!this.isSelected());
     this.selectTask.emit(this.task);
   }
 
-  onDelete() {
-    this.deleteTask.emit(this.task.id);
-  }
-
   onViewModalOpen() {
     this.openViewModal.emit(this.task);
-  }
-
-  onEditModalOpen() {
-    this.openEditModal.emit(this.task);
   }
 }
