@@ -20,7 +20,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./dashboard/task-list.component').then((m) => m.TaskListComponent),
       },
-           {
+      {
         path: 'create-task',
         loadComponent: () =>
           import('./dashboard/create-task.component').then((m) => m.CreateTaskComponent),

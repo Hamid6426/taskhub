@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, effect, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -7,10 +7,11 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <!-- Sidebar -->
     <div
       class="d-flex flex-column bg-dark text-white"
-      style="position: sticky; top: 0; height: 100vh;"
+      [style.position]="'sticky'"
+      [style.top.px]="0"
+      [style.height]="'100vh'"
       [style.width.px]="isCollapsed() ? 60 : 220"
     >
       <h4 *ngIf="!isCollapsed()" class="p-3 mb-4">User Panel</h4>
@@ -40,20 +41,40 @@ import { CommonModule } from '@angular/common';
       </ul>
 
       <!-- Toggle button -->
-      <button class="btn btn-dark border-0 mt-auto" (click)="isCollapsed.set(!isCollapsed())">
+      <button
+        class="bg-dark text-white py-2 px-3 border-0 d-flex align-items-center w-100"
+        (click)="isCollapsed.set(!isCollapsed())"
+      >
         <i
           class="bi me-2"
           [ngClass]="isCollapsed() ? 'bi-arrow-right-square' : 'bi-arrow-left-square'"
         ></i>
-        <span *ngIf="!isCollapsed()" class="mr-4">Collapse</span>
+        <span *ngIf="!isCollapsed()" class="mx-1">Collapse</span>
       </button>
     </div>
   `,
 })
 export class UserSidebarComponent {
   isCollapsed = signal(false);
+  isMobileSignal = signal(window.innerWidth < 768);
 
-  isMobile(): boolean {
-    return window.innerWidth < 768;
+  constructor() {
+    const updateCollapse = () => {
+      const isMobile = window.innerWidth < 768;
+      this.isMobileSignal.set(isMobile);
+
+      // Collapse on mobile, expand on desktop
+      if (isMobile) {
+        this.isCollapsed.set(true);
+      } else {
+        this.isCollapsed.set(false);
+      }
+    };
+
+    // Initial check
+    updateCollapse();
+
+    // Listen for resize
+    window.addEventListener('resize', updateCollapse);
   }
 }

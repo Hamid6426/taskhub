@@ -11,15 +11,14 @@ import { CommonModule } from '@angular/common';
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
       <a routerLink="/" class="navbar-brand">TaskHub</a>
 
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item" *ngIf="!currentUser()">
-            <a routerLink="/login" class="nav-link">Login</a>
-          </li>
-          <li class="nav-item" *ngIf="currentUser()">
-            <button class="btn btn-outline-light btn-sm" (click)="logout()">Logout</button>
-          </li>
-        </ul>
+      <!-- Independent login/logout, always visible -->
+      <div class="ms-auto d-flex align-items-center">
+        <a *ngIf="!currentUser()" routerLink="/login" class="btn btn-outline-light btn-sm">
+          Login
+        </a>
+        <button *ngIf="currentUser()" class="btn btn-outline-light btn-sm" (click)="logout()">
+          Logout
+        </button>
       </div>
     </nav>
   `,

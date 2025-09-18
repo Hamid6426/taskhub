@@ -13,7 +13,7 @@ import { ViewModalComponent } from '../../shared/components/view-modal.component
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TaskFilters, ReadonlyTaskList, Loader, ViewModalComponent],
+  imports: [CommonModule, TaskFilters, Loader, ReadonlyTaskList, ViewModalComponent],
   template: `
     <app-loader *ngIf="loading()"></app-loader>
 
@@ -32,11 +32,11 @@ import { ViewModalComponent } from '../../shared/components/view-modal.component
       (openViewModal)="viewingTask.set($event)"
     ></app-readonly-task-list>
 
-    <app-readonly-view-modal
+    <app-view-modal
       *ngIf="viewingTask()"
       [task]="viewingTask()"
       (close)="viewingTask.set(null)"
-    ></app-readonly-view-modal>
+    ></app-view-modal>
 
     <div *ngIf="error()">{{ error() }}</div>
   `,
